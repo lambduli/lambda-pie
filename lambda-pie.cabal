@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bd8df4be1bb0f2e2f7292c6987c6133ad54bd634b0aa250ebdd33404a88ed0d5
+-- hash: c464e4cc187f30d102ef01e11f29cd867f03d014f797aa5a222d33cc4111e2b3
 
 name:           lambda-pie
 version:        0.1.0.0
@@ -33,6 +33,8 @@ library
       Kind
       Reduction
       Type
+      TypeChecker
+      Value
   other-modules:
       Paths_lambda_pie
   hs-source-dirs:

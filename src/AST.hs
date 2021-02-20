@@ -14,5 +14,5 @@ data Term'Infer
 -- Checkable Term
 data Term'Check
   = Inf Term'Infer
-  | Lam Term'Check
+  | Lam String Term'Check
   deriving (Show, Eq)
