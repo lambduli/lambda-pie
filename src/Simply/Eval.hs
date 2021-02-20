@@ -1,7 +1,7 @@
-module Eval where
+module Simply.Eval where
 
-import AST (Term'Infer(..), Term'Check(..))
-import qualified Value as Val
+import Simply.AST (Term'Infer(..), Term'Check(..))
+import qualified Simply.Value as Val
 
 
 eval'infer :: Term'Infer -> Val.Value

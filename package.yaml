@@ -26,6 +26,16 @@ library:
   source-dirs: src
 
 executables:
+  simply:
+    main:               Main.hs
+    source-dirs:        app/simply
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - lambda-pie
+
   lambda-pie-exe:
     main:                Main.hs
     source-dirs:         app

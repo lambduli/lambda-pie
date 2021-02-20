@@ -1,4 +1,4 @@
-module Kind where
+module Simply.Kind where
 
 
 data Kind = Star

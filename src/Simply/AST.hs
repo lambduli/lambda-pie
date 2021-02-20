@@ -1,6 +1,6 @@
-module AST where
+module Simply.AST where
 
-import Type
+import Simply.Type
 
 
 -- Inferable Term

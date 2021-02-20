@@ -1,11 +1,11 @@
-module TypeChecker where
+module Simply.TypeChecker where
 
 import Control.Monad
 
-import Context
-import Kind
-import Type
-import AST
+import Simply.Context
+import Simply.Kind
+import Simply.Type
+import Simply.AST
 
 type Result a = Either String a
 

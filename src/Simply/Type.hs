@@ -1,4 +1,4 @@
-module Type where
+module Simply.Type where
 
 
 data Type

@@ -1,4 +1,4 @@
-module Value where
+module Simply.Value where
 
 
 data Value

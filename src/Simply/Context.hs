@@ -1,7 +1,7 @@
-module Context where
+module Simply.Context where
 
-import Type
-import Kind
+import Simply.Type
+import Simply.Kind
 
 data Info
   = HasKind Kind
