@@ -1,12 +1,14 @@
 module Simply.AST where
 
-import Simply.Type
+import Simply.Type ( Type )
+import Simply.Name ( Name )
 
 
 -- Inferable Term
 data Term'Infer
   = Term'Check ::: Type
-  | Var String
+  | Bound Int String
+  | Free Name
   | Term'Infer :@: Term'Check
   deriving (Show, Eq)
 
