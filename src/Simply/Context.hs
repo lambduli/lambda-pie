@@ -1,11 +1,13 @@
 module Simply.Context where
 
-import Simply.Type
-import Simply.Kind
+import Simply.Name ( Name )
+import Simply.Type ( Type )
+import Simply.Kind ( Kind )
+
 
 data Info
   = HasKind Kind
   | HasType Type
   deriving (Show)
 
-type Context = [(String, Info)]
+type Context = [(Name, Info)]
