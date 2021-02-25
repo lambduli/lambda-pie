@@ -1,7 +1,9 @@
 module Simply.Type where
 
+import Simply.Name ( Name )
+
 
 data Type
-  = TVar String
+  = TFree Name
   | Type :-> Type
   deriving (Show, Eq)
