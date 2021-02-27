@@ -4,16 +4,16 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4dd9b8901c98cb0b9c966b1920d1368405b40d34f42489f0c04a34d0e508ab1b
+-- hash: d053dc1b660a19dd8a5587a820f19334a1ec0424b46b238db51c9bec962eea34
 
 name:           lambda-pie
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/lambda-pie#readme>
-homepage:       https://github.com/githubuser/lambda-pie#readme
-bug-reports:    https://github.com/githubuser/lambda-pie/issues
-author:         Author name here
+description:    Please see the README on GitHub at https://github.com/Taskkill/lambda-pie
+homepage:       https://github.com/https://github.com/Taskkill/lambda-pie#readme
+bug-reports:    https://github.com/https://github.com/Taskkill/lambda-pie/issues
+author:         Taskkill
 maintainer:     example@example.com
-copyright:      2021 Author name here
+copyright:      2021 Taskkill
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -23,14 +23,21 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/lambda-pie
+  location: https://github.com/https://github.com/Taskkill/lambda-pie
 
 library
   exposed-modules:
+      Dependently.AST
+      Dependently.Context
+      Dependently.Eval
+      Dependently.TypeChecker
+      Dependently.Value
       Simply.AST
       Simply.Context
       Simply.Eval
       Simply.Kind
+      Simply.Name
+      Simply.Substitute
       Simply.Type
       Simply.TypeChecker
       Simply.Value
