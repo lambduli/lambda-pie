@@ -17,7 +17,7 @@ eval'infer (left :@: right) env =
 
 
 val'app :: Val.Value -> Val.Value -> Val.Value
-val'app l@(Val.Lam par body env) arg
+val'app (Val.Lam _ body env) arg
   = eval'check body (arg : env)
 val'app left right =
   Val.App left right
