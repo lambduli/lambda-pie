@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d053dc1b660a19dd8a5587a820f19334a1ec0424b46b238db51c9bec962eea34
+-- hash: feb66c8885126ec91006cbf7067025dac042663bff81a6769de6cf87e81c3f7e
 
 name:           lambda-pie
 version:        0.1.0.0
@@ -30,6 +30,8 @@ library
       Dependently.AST
       Dependently.Context
       Dependently.Eval
+      Dependently.Name
+      Dependently.Substitute
       Dependently.TypeChecker
       Dependently.Value
       Simply.AST
