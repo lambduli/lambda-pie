@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: feb66c8885126ec91006cbf7067025dac042663bff81a6769de6cf87e81c3f7e
+-- hash: 4d307de002023594bb46648efaf57fc4725b545e3139e825bc88920178be0bab
 
 name:           lambda-pie
 version:        0.1.0.0
@@ -49,6 +49,18 @@ library
       src
   build-depends:
       base >=4.7 && <5
+  default-language: Haskell2010
+
+executable dependently
+  main-is: Main.hs
+  other-modules:
+      Paths_lambda_pie
+  hs-source-dirs:
+      app/dependently
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , lambda-pie
   default-language: Haskell2010
 
 executable lambda-pie-exe

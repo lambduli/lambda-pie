@@ -10,4 +10,4 @@ import Simply.Value
 
 main :: IO ()
 main = do
-  putStrLn "Hello World!"
+  putStrLn "Hello λ->"
