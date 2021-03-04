@@ -21,7 +21,7 @@ kind'check :: Context -> Type -> Kind -> Result ()
 kind'check context (TFree name) Star =
   case lookup name context of
     Just (HasKind Star) -> return ()
-    Just _ -> throwError $ "A type var " ++ show name ++ " has not kind of a *."
+    Just _ -> throwError $ "A type var " ++ show name ++ " isn't of a kind *."
     Nothing -> throwError $ "Unknown type var identifier " ++ show name ++ "."
 kind'check context (left't :-> right't) Star = do
   kind'check context left't Star
@@ -60,3 +60,23 @@ type'check level context (Lam par body) (in't :-> out't) = do
             (subst'check 0 (Free (Local level par)) body) out't
 type'check _ _ _ _ =
   throwError "Type mismatch."
+
+
+class Typeable a where
+  type'of :: a -> Context -> Result Type
+
+
+instance Typeable Term'Infer where
+  type'of ann@(expr ::: type') context
+    = type'infer'0 context ann
+  type'of (Free _) context
+    = Right $ TFree $ Global "*" -- kinda ugly and horrible, but get the message delivered
+  type'of app@(left :@: right) context
+    = type'infer'0 context app
+
+
+instance Typeable Term'Check where
+  type'of (Inf expr) context
+    = type'of expr context
+  type'of (Lam par body) context
+    = Left "Can't infer a type of an unannotated λ."
