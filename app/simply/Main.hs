@@ -40,8 +40,10 @@ repl context = do
         Right expr -> do
           -- try to find and print the type
           case type'of expr context of
-            Left err -> do putStrLn $ "    Type Error: " ++ err
-            Right type' -> do putStrLn $ "    :: " ++ show type'
+            Left err -> do putStrLn $ "       Type Error: " ++ err
+            Right type' -> do
+              let val = eval expr
+              putStrLn $ "       " ++ show val ++ " :: " ++ show type'
           repl context
 
 -- assume (Foo :: *) (foo :: Foo)
