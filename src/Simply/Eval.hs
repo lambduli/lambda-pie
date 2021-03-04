@@ -9,6 +9,8 @@ import Simply.Name
 eval'infer :: Term'Infer -> Env -> Val.Value
 eval'infer (e ::: _) env
   = eval'check e env
+eval'infer (Bound ind name) env
+  = env !! ind
 eval'infer (Free name) env
   | Global id <- name = Val.Free id
   | Local _ id <- name = Val.Free id
@@ -28,3 +30,14 @@ eval'check (Inf e) env
   = eval'infer e env
 eval'check (Lam par body) env
   = Val.Lam par body env
+
+
+class Evaluate a where
+  eval :: a -> Val.Value
+
+
+instance Evaluate Term'Infer where
+  eval term = eval'infer term []
+
+instance Evaluate Term'Check where
+  eval term = eval'check term []
