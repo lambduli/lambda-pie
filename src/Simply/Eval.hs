@@ -16,6 +16,8 @@ eval'infer (Free name) env
   | Local _ id <- name = Val.Free id
 eval'infer (left :@: right) env =
   val'app (eval'infer left env) (eval'check right env)
+eval'infer (LamAnn par in'type body) env
+  = Val.Lam par (Inf body) env
 
 
 val'app :: Val.Value -> Val.Value -> Val.Value

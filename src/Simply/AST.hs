@@ -10,6 +10,7 @@ data Term'Infer
   | Bound Int String
   | Free Name
   | Term'Infer :@: Term'Check
+  | LamAnn String Type Term'Infer
   deriving (Eq)
 
 
@@ -20,8 +21,12 @@ instance Show Term'Infer where
     = name ++ show ind
   show (Free name)
     = show name
+  show (left :@: r@(Inf (r'l :@: r'r)))
+    = show left ++ " (" ++ show r ++ ")"
   show (left :@: right)
-    = "(" ++ show left ++ " " ++ show right ++ ")"
+    = show left ++ " " ++ show right
+  show (LamAnn par in'type body)
+    = "(λ " ++ par ++ " :: " ++ show in'type ++ " -> " ++ show body ++ ")"
 
 
 -- Checkable Term

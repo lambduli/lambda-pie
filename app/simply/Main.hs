@@ -12,10 +12,16 @@ main :: IO ()
 main = do
   putStrLn "REPL for λ->"
   putStrLn ""
-  -- putStrLn $ show $ parse'expr "(((a b) c) d) :: Foo"
-  -- putStrLn ""
 
-  repl []
+  print $ parse'expr "(lambda c -> c)"
+  print $ parse'expr "(lambda (c :: Bar) -> c)"
+  print $ parse'expr "a (lambda c -> c)"
+  print $ parse'expr "a b c (d e (f g h)) (i j) k"
+  print $ parse'expr "a :: Foo (\\ x -> x) ((\\ c -> c) :: (B -> B) d e f) g h i j"
+  -- putStrLn ""
+  -- putStrLn $ show $ parse'expr "(lambda (x :: Foo) (y :: Bar) -> x)"
+
+  -- repl []
 
 
 readExpression :: IO String
@@ -50,3 +56,5 @@ repl context = do
 -- ( ((lambda x -> x) :: Foo -> Foo) foo )
 
 -- assume (Bool :: *) (True :: Bool) (False :: Bool)
+
+-- (lambda (x :: Foo) (y :: Bar) -> x)

@@ -16,8 +16,6 @@ import Simply.Name
 import Simply.Context
 import Simply.Kind
 import Simply.Type
-
-import Debug.Trace
 }
 
 
@@ -46,12 +44,24 @@ Program         ::  { Either Command Term'Check }
                 |   Command                                         { Left $1 }
 
 
+TypedParams     ::  { [(String, Type)] }
+                :   OneOrMany(TypedParam)                           { $1 }
+
+
+TypedParam      ::  { (String, Type) }
+                :   '(' var '::' Type ')'                           { ($2, $4) }
+
+
 TermInfer       ::  { Term'Infer }
                 :   var                                             { Free $ Global $1 }
 --                |   TermInfer OneOrMany(TermCheck)                  { foldl (:@:) $1 (trace ("____ zbytek listu?  " ++ show $2) $2) }
 -- NOTE: disabling the `a b c d` syntax for now due to shift/reduce conflicts and incorrect associativity
                 |   '(' TermInfer TermCheck ')'                     { $2 :@: $3 }
                 |   TermCheck '::' Type                             { $1 ::: $3 }
+                |   '(' lambda TypedParams '->' TermInfer ')'       { fix $ foldr
+                                                                        (\ (par, type') body -> LamAnn par type' body)
+                                                                        $5
+                                                                        $3 }
                 |   '(' TermInfer ')' {- %shift -}                  { $2 }
 
 
@@ -97,8 +107,16 @@ OneOrMany(tok)
 
 {
 
-fix :: Term'Check -> Term'Check
-fix lambda = fix'check lambda []
+class Fix a where
+  fix :: a -> a
+
+
+instance Fix Term'Check where
+  fix lambda = fix'check lambda []
+
+
+instance Fix Term'Infer where
+  fix lambda = fix'infer lambda []
 
 
 fix'check :: Term'Check -> [String] -> Term'Check
@@ -119,6 +137,8 @@ fix'infer (Free (Global name)) context
       Nothing -> Free (Global name)
 fix'infer (left :@: right) context
   = (fix'infer left context) :@: (fix'check right context)
+fix'infer (LamAnn par type' body) context
+  = LamAnn par type' $ fix'infer body (par : context)
 
 
 parseError _ = do
