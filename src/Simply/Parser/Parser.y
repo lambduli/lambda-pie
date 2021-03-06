@@ -56,7 +56,8 @@ TermInfer       ::  { Term'Infer }
                 :   var                                             { Free $ Global $1 }
 --                |   '(' TermInfer TermCheck ')'                     { $2 :@: $3 }
                 |   AppLeft OneOrMany(AppRight)                     { foldl (:@:) $1 $2 }
-                |   TermCheck '::' Type                             { $1 ::: $3 }
+                |   '(' TermCheck '::' Type ')'                     { $2 ::: $4 }
+                -- NOTE: adding parens around removes some conflicts
                 |   '(' lambda TypedParams '->' TermInfer ')'       { fix $ foldr
                                                                         (\ (par, type') body -> LamAnn par type' body)
                                                                         $5
@@ -76,7 +77,8 @@ AppLeft         ::  { Term'Infer }
 
 AppRight        ::  { Term'Check }
                 :   var                                             { Inf $ Free $ Global $1 }
-                |   TermCheck '::' Type                             { Inf $ $1 ::: $3 }
+                |   '(' TermCheck '::' Type ')'                     { Inf $ $2 ::: $4 }
+                -- NOTE: adding parens around removes 9 r/r conflict
                 |   '(' lambda TypedParams '->' TermInfer ')'       { Inf $ fix $ foldr
                                                                         (\ (par, type') body -> LamAnn par type' body)
                                                                         $5
