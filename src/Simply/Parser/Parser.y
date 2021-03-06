@@ -54,15 +54,39 @@ TypedParam      ::  { (String, Type) }
 
 TermInfer       ::  { Term'Infer }
                 :   var                                             { Free $ Global $1 }
---                |   TermInfer OneOrMany(TermCheck)                  { foldl (:@:) $1 (trace ("____ zbytek listu?  " ++ show $2) $2) }
--- NOTE: disabling the `a b c d` syntax for now due to shift/reduce conflicts and incorrect associativity
-                |   '(' TermInfer TermCheck ')'                     { $2 :@: $3 }
+--                |   '(' TermInfer TermCheck ')'                     { $2 :@: $3 }
+                |   AppLeft OneOrMany(AppRight)                     { foldl (:@:) $1 $2 }
                 |   TermCheck '::' Type                             { $1 ::: $3 }
                 |   '(' lambda TypedParams '->' TermInfer ')'       { fix $ foldr
                                                                         (\ (par, type') body -> LamAnn par type' body)
                                                                         $5
                                                                         $3 }
                 |   '(' TermInfer ')' {- %shift -}                  { $2 }
+
+
+AppLeft         ::  { Term'Infer }
+                :   var                                             { Free $ Global $1 }
+                |   TermCheck '::' Type                             { $1 ::: $3 }
+                |   '(' lambda TypedParams '->' TermInfer ')'       { fix $ foldr
+                                                                        (\ (par, type') body -> LamAnn par type' body)
+                                                                        $5
+                                                                        $3 }
+                |   '(' TermInfer ')' {- %shift -}                  { $2 }
+
+
+AppRight        ::  { Term'Check }
+                :   var                                             { Inf $ Free $ Global $1 }
+                |   TermCheck '::' Type                             { Inf $ $1 ::: $3 }
+                |   '(' lambda TypedParams '->' TermInfer ')'       { Inf $ fix $ foldr
+                                                                        (\ (par, type') body -> LamAnn par type' body)
+                                                                        $5
+                                                                        $3 }
+                |   '(' TermInfer ')' {- %shift -}                  { Inf $ $2 }
+                |   '(' lambda Params '->' TermCheck ')'            { fix $ foldr
+                                                                        (\ arg body -> Lam arg body)
+                                                                        $5
+                                                                        $3 }
+                |   '(' TermCheck ')'                               { $2 }
 
 
 Params          ::  { [String] }
