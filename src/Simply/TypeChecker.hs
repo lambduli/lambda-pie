@@ -49,6 +49,10 @@ type'infer level context (left :@: right) = do
       type'check level context right in't
       return out't
     _ -> throwError "Type error: illegal application."
+type'infer level context (LamAnn par in'type body) = do
+  out'type <- type'infer (level + 1) ((Local level par, HasType in'type) : context)
+                (subst'infer 0 (Free (Local level par)) body)
+  return $ in'type :-> out'type
 
 
 type'check :: Int -> Context -> Term'Check -> Type -> Result ()
@@ -73,6 +77,8 @@ instance Typeable Term'Infer where
     = Right $ TFree $ Global "*" -- kinda ugly and horrible, but get the message delivered
   type'of app@(left :@: right) context
     = type'infer'0 context app
+  type'of lam@(LamAnn name in'type body) context
+    = type'infer'0 context lam
 
 
 instance Typeable Term'Check where

@@ -13,6 +13,8 @@ subst'infer level rep (Free name)
   = Free name
 subst'infer level rep (left :@: right)
   = subst'infer level rep left :@: subst'check level rep right
+subst'infer level rep (LamAnn par in'type body)
+  = LamAnn par in'type $ subst'infer (level + 1) rep body
 
 
 subst'check :: Int -> Term'Infer -> Term'Check -> Term'Check
