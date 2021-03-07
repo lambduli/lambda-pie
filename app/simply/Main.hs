@@ -13,15 +13,15 @@ main = do
   putStrLn "REPL for λ->"
   putStrLn ""
 
-  print $ parse'expr "(lambda c -> c)"
-  print $ parse'expr "(lambda (c :: Bar) -> c)"
-  print $ parse'expr "a (lambda c -> c)"
-  print $ parse'expr "a b c (d e (f g h)) (i j) k"
-  print $ parse'expr "a :: Foo (\\ x -> x) ((\\ c -> c) :: (B -> B) d e f) g h i j"
+  -- print $ parse'expr "(lambda c -> c)"
+  -- print $ parse'expr "(lambda (c :: Bar) -> c)"
+  -- print $ parse'expr "a (lambda c -> c)"
+  -- print $ parse'expr "a b c (d e (f g h)) (i j) k"
+  -- print $ parse'expr "a :: Foo (\\ x -> x) ((\\ c -> c) :: (B -> B) d e f) g h i j"
   -- putStrLn ""
   -- putStrLn $ show $ parse'expr "(lambda (x :: Foo) (y :: Bar) -> x)"
 
-  -- repl []
+  repl []
 
 
 readExpression :: IO String
