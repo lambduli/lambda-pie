@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9af866af37420cde68c2641d1e7dcd8d2a94faf9d6660712c0611066c40e374c
+-- hash: 0d75b8b1f628e2f5b461ee3eea506fabb3912d51a6e6a975e3f5e6d232eafdb5
 
 name:           lambda-pie
 version:        0.1.0.0
@@ -30,9 +30,14 @@ source-repository head
 library
   exposed-modules:
       Dependently.AST
+      Dependently.Command
       Dependently.Context
       Dependently.Eval
       Dependently.Name
+      Dependently.Parser.Lexer
+      Dependently.Parser.Parser
+      Dependently.Parser.Token
+      Dependently.Parser.Utils
       Dependently.Substitute
       Dependently.TypeChecker
       Dependently.Value
