@@ -65,7 +65,7 @@ TermInfer2      ::  { Term'Infer }
                 |   Forall                                          { $1 }
                 |   var                                             { Free $ Global $1 }
                 |   '(' TermInfer ')' {- %shift -}                  { $2 }
-                |   AppLeft OneOrMany(AppRight)                     { foldl (:@:) $1 $2 }
+                |   TermInfer2 OneOrMany(AppRight)                  { foldl (:@:) $1 $2 }
                 |   '(' lambda TypedParams '->' TermInfer ')'       { fix $ foldr
                                                                        (\ (par, type') body -> LamAnn par type' body)
                                                                        $5
