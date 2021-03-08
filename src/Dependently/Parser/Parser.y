@@ -107,19 +107,12 @@ AppLeft         ::  { Term'Infer }
 AppRight        ::  { Term'Check }
                 :   TermAnn '::' TermCheck                          { Inf $ $1 ::: $3 }
                 |   TermInfer2                                      { Inf $1 }
-                -- |   '*'                                             { Inf $ Star }
-                -- |   Forall                                          { Inf $1 }
-                -- |   var                                             { Inf $ Free $ Global $1 }
-                -- |   '(' lambda TypedParams '->' TermInfer ')'       { Inf $ fix $ foldr
-                --                                                         (\ (par, type') body -> LamAnn par type' body)
+                |   TermCheck2                                      { $1 }
+                -- |   '(' lambda Params '->' TermCheck ')'            { fix $ foldr
+                --                                                         (\ arg body -> Lam arg body)
                 --                                                         $5
                 --                                                         $3 }
-                -- |   '(' TermInfer ')' {- %shift -}                  { Inf $ $2 }
-                |   '(' lambda Params '->' TermCheck ')'            { fix $ foldr
-                                                                        (\ arg body -> Lam arg body)
-                                                                        $5
-                                                                        $3 }
-                |   '(' TermCheck ')'                               { $2 }
+                -- |   '(' TermCheck ')'                               { $2 }
 
 
 Forall          ::  { Term'Infer }
@@ -138,7 +131,11 @@ Params          ::  { [String] }
 
 TermCheck       ::  { Term'Check }
                 :   TermInfer                                       { Inf $1 }
-                |   '(' lambda Params '->' TermCheck ')'            { fix $ foldr
+                |   TermCheck2                                      { $1 }
+
+
+TermCheck2      ::  { Term'Check }
+                :   '(' lambda Params '->' TermCheck ')'            { fix $ foldr
                                                                         (\ arg body -> Lam arg body)
                                                                         $5
                                                                         $3 }
