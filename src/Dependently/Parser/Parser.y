@@ -106,14 +106,15 @@ AppLeft         ::  { Term'Infer }
 
 AppRight        ::  { Term'Check }
                 :   TermAnn '::' TermCheck                          { Inf $ $1 ::: $3 }
-                |   '*'                                             { Inf $ Star }
-                |   Forall                                          { Inf $1 }
-                |   var                                             { Inf $ Free $ Global $1 }
-                |   '(' lambda TypedParams '->' TermInfer ')'       { Inf $ fix $ foldr
-                                                                        (\ (par, type') body -> LamAnn par type' body)
-                                                                        $5
-                                                                        $3 }
-                |   '(' TermInfer ')' {- %shift -}                  { Inf $ $2 }
+                |   TermInfer2                                      { Inf $1 }
+                -- |   '*'                                             { Inf $ Star }
+                -- |   Forall                                          { Inf $1 }
+                -- |   var                                             { Inf $ Free $ Global $1 }
+                -- |   '(' lambda TypedParams '->' TermInfer ')'       { Inf $ fix $ foldr
+                --                                                         (\ (par, type') body -> LamAnn par type' body)
+                --                                                         $5
+                --                                                         $3 }
+                -- |   '(' TermInfer ')' {- %shift -}                  { Inf $ $2 }
                 |   '(' lambda Params '->' TermCheck ')'            { fix $ foldr
                                                                         (\ arg body -> Lam arg body)
                                                                         $5
