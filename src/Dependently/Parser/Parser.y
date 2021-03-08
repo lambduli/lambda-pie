@@ -2,6 +2,7 @@
 module Dependently.Parser.Parser (parse'expr) where
 
 import Data.List (elemIndex)
+import Data.Bifunctor (first)
 
 import Control.Monad (unless, fail)
 import Control.Monad.State hiding (fix)
@@ -45,8 +46,8 @@ Program         ::  { Either Command Term'Check }
 
 
 TypedParams     ::  { [(String, Term'Check)] }
-                :   OneOrMany(TypedParam)                           { $1 }
-                -- |   var '::' TermCheck                              { [($1, $3)] }
+                :   var '::' TermCheck                              { [($1, $3)] }
+                |   OneOrMany(TypedParam)                           { $1 }
 
 
 
@@ -55,26 +56,48 @@ TypedParam      ::  { (String, Term'Check) }
 
 
 TermInfer       ::  { Term'Infer }
-                :   TermCheck '::' TermCheck                { $1 ::: $3 }
-                -- NOTE: adding parens around removes some conflicts
-                |   '*'                                             { Star }
+                :   TermAnn '::' TermCheck                          { $1 ::: $3 }
+                |   TermInfer2                                      { $1 }
+
+
+TermInfer2      ::  { Term'Infer }
+                :   '*'                                             { Star }
                 |   Forall                                          { $1 }
                 |   var                                             { Free $ Global $1 }
-                -- |   '(' TermInfer TermCheck ')'                     { $2 :@: $3 }
                 |   '(' TermInfer ')' {- %shift -}                  { $2 }
                 |   AppLeft OneOrMany(AppRight)                     { foldl (:@:) $1 $2 }
-                -- |   '(' lambda TypedParams '->' TermInfer ')'       { fix $ foldr
+                |   '(' lambda TypedParams '->' TermInfer ')'       { fix $ foldr
+                                                                       (\ (par, type') body -> LamAnn par type' body)
+                                                                       $5
+                                                                       $3 }
+
+
+TermAnn         ::  { Term'Check }
+                :   TermInfer2                                      { Inf $1 }
+                
+                -- :   '*'                                             { Inf Star }
+                -- |   var                                             { Inf $ Free $ Global $1 }
+                -- |   '(' TermInfer ')' {- %shift -}                  { $2 }
+                -- |   AppLeft OneOrMany(AppRight)                     { foldl (:@:) $1 $2 }
+                -- |   '(' lambda TypedParams '->' TermInfer ')'       { Inf $ fix $ foldr
                 --                                                        (\ (par, type') body -> LamAnn par type' body)
                 --                                                        $5
                 --                                                        $3 }
+                |   '(' lambda Params '->' TermCheck ')'            { fix $ foldr
+                                                                        (\ arg body -> Lam arg body)
+                                                                        $5
+                                                                        $3 }
+                |   '(' TermCheck ')'                               { $2 }
+
 
 
 AppLeft         ::  { Term'Infer }
-                :   TermCheck '::' TermCheck                { $1 ::: $3 }
-                |   '*'                                             { Star }
-                |   Forall                                          { $1 }
-                |   var                                             { Free $ Global $1 }
-                |   '(' TermInfer ')' {- %shift -}                  { $2 }
+                :   TermInfer2                                      { $1 }
+                -- :   TermAnn '::' TermCheck                          { $1 ::: $3 }
+                -- |   '*'                                             { Star }
+                -- |   Forall                                          { $1 }
+                -- |   var                                             { Free $ Global $1 }
+                -- |   '(' TermInfer ')' {- %shift -}                  { $2 }
                 -- |   '(' lambda TypedParams '->' TermInfer ')'       { fix $ foldr
                 --                                                         (\ (par, type') body -> LamAnn par type' body)
                 --                                                         $5
@@ -82,15 +105,14 @@ AppLeft         ::  { Term'Infer }
 
 
 AppRight        ::  { Term'Check }
-                :   TermCheck '::' TermCheck                { Inf $ $1 ::: $3 }
-                -- NOTE: adding parens around removes 9 r/r conflict
+                :   TermAnn '::' TermCheck                          { Inf $ $1 ::: $3 }
                 |   '*'                                             { Inf $ Star }
                 |   Forall                                          { Inf $1 }
                 |   var                                             { Inf $ Free $ Global $1 }
-                -- |   '(' lambda TypedParams '->' TermInfer ')'       { Inf $ fix $ foldr
-                --                                                         (\ (par, type') body -> LamAnn par type' body)
-                --                                                         $5
-                --                                                         $3 }
+                |   '(' lambda TypedParams '->' TermInfer ')'       { Inf $ fix $ foldr
+                                                                        (\ (par, type') body -> LamAnn par type' body)
+                                                                        $5
+                                                                        $3 }
                 |   '(' TermInfer ')' {- %shift -}                  { Inf $ $2 }
                 |   '(' lambda Params '->' TermCheck ')'            { fix $ foldr
                                                                         (\ arg body -> Lam arg body)
@@ -123,14 +145,7 @@ TermCheck       ::  { Term'Check }
 
 
 Command         ::  { Command }
-                :   assume var '::' '*'                             { Assume [ (Global $2, Inf Star) ] }
-                |   assume var '::' TermCheck                       { Assume [ (Global $2, $4) ] }
-                |   assume OneOrMany(AssumeWrapped)                 { Assume $2 }
-
-
-AssumeWrapped   ::  { (Name, Term'Check) }
-                :   '(' var '::' '*' ')'                            { (Global $2, Inf Star) }
-                |   '(' var '::' TermCheck ')'                      { (Global $2, $4) }
+                :   assume TypedParams                              { Assume map (first Global) $2 }
 
 
 
