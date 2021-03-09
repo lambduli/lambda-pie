@@ -9,7 +9,7 @@ newtype Command = Assume [(Name, Term'Check)]
 
 instance Show Command where
   show (Assume lst)
-    = "assume " ++ shw lst
+    = "assume" ++ shw lst
       where
         shw [] = ""
-        shw ((name, info) : rest) = "(" ++ show name ++ " :: " ++ show info ++ ")"
+        shw ((name, info) : rest) = " (" ++ show name ++ " :: " ++ show info ++ ")" ++ shw rest
