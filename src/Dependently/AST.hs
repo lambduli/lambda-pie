@@ -18,6 +18,10 @@ data Term'Infer
 instance Show Term'Infer where
   show (term ::: type')
     = show term ++ " :: " ++ show type'
+  show Star
+    = "*"
+  show (Pi par in'type out'type)
+    = "Pi " ++ par ++ " :: " ++ show in'type ++ " . " ++ show out'type
   show (Bound ind name)
     = name ++ show ind
   show (Free name)
