@@ -62,20 +62,27 @@ AppLeft         ::  { Term'Infer }
                 :   '*'                                             { Star }
                 |   Pi                                              { $1 }
                 |   var                                             { Free $ Global $1 }
+                |   var '::' Type                                   { Inf (Free $ Global $1) ::: $3 }
+                |   '(' var '::' Type ')'                           { Inf (Free $ Global $2) ::: $4 }
                 |   '(' Lambda '::' Type ')'                        { $2 ::: $4 }
                 |   Lambda '::' Type                                { $1 ::: $3 }
                 |   '(' App ')'                                     { $2 }
-                |   var '::' Type                                   { Inf (Free $ Global $1) ::: $3 }
-                |   '(' var '::' Type ')'                           { Inf (Free $ Global $2) ::: $4 }
+                |   '(' App ')' '::' Type                           { Inf $2 ::: $5 }
+                |   '(' '(' App ')' '::' Type ')'                   { Inf $3 ::: $6 }
 
 
 AppRight        ::  { Term'Check }
                 :   '*'                                             { Inf $ Star }
                 |   Pi                                              { Inf $ $1 }
-                |   var                                             { Inf $ Free $ Global $1 }
-                |   '(' Lambda '::' Type ')'                        { Inf $ $2 ::: $4 }
                 |   Lambda                                          { $1 }
+                |   '(' Lambda '::' Type ')'                        { Inf $ $2 ::: $4 }
+                -- |   Lambda '::' Type                                { Inf $1 ::: $3 }
+                |   var                                             { Inf $ Free $ Global $1 }
+                |   '(' var '::' Type ')'                           { Inf (Inf (Free $ Global $2) ::: $4) }
+                -- |   var '::' Type                                   { Inf (Inf (Free $ Global $1) ::: $3) }
                 |   '(' App ')'                                     { Inf $2 }
+                -- |   '(' App ')' '::' Type                           { Inf (Inf $2 ::: $5) }
+                |   '(' '(' App ')' '::' Type ')'                   { Inf (Inf $3 ::: $6) }
 
 
 Term            ::  { Term'Check }
