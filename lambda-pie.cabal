@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0d75b8b1f628e2f5b461ee3eea506fabb3912d51a6e6a975e3f5e6d232eafdb5
+-- hash: 3a70cc46b94aa0f6dfba118cbe19311f08bfa3d417f5257a7b0e451c400ba006
 
 name:           lambda-pie
 version:        0.1.0.0
@@ -123,6 +123,8 @@ test-suite lambda-pie-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      ParserSpec
+      TypeCheckSpec
       Paths_lambda_pie
   hs-source-dirs:
       test
