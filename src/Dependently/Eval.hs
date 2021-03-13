@@ -9,8 +9,10 @@ import Dependently.Name
 eval'infer :: Term'Infer -> Val.Env -> Val.Value
 eval'infer Star env
   = Val.Star
+-- WIP
 eval'infer (Pi par in'type out'type) env
-  = Val.Pi par (eval'check in'type env) out'type  env
+  = Val.Pi par (eval'check in'type env) out'type env
+-- /WIP
 eval'infer (e ::: _) env
   = eval'check e env
 eval'infer (Bound ind name) env
@@ -27,8 +29,10 @@ eval'infer (LamAnn par in'type body) env
 val'app :: Val.Value -> Val.Value -> Val.Value
 val'app (Val.Lam _ body env) arg
   = eval'check body (arg : env)
+-- WIP
 val'app (Val.Pi _ in'type out'type env) arg
   = eval'check out'type (arg : env)
+-- /WIP
 val'app left right
   = Val.App left right
 
