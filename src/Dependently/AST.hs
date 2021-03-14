@@ -20,10 +20,11 @@ instance Show Term'Infer where
     = show term ++ " :: " ++ show type'
   show Star
     = "*"
+  -- show (Pi )
   show (Pi par in'type out'type)
-    = "Pi " ++ par ++ " :: " ++ show in'type ++ " . " ++ show out'type
+    = "(Pi " ++ par ++ " :: " ++ show in'type ++ " . " ++ show out'type ++ ")"
   show (Bound ind name)
-    = name ++ show ind
+    = name -- ++ show ind
   show (Free name)
     = show name
   show (left :@: r@(Inf (r'l :@: r'r)))

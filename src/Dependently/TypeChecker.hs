@@ -9,6 +9,8 @@ import Dependently.Name
 import Dependently.Eval
 import Dependently.Substitute
 
+import Debug.Trace
+
 
 type Result a = Either String a
 
@@ -37,7 +39,9 @@ type'infer level context (Pi par in'type out'type) = do
 type'infer level context (Free name) = do
   case lookup name context of
     Just type' -> return type'
-    Nothing -> throwError $ "Unknown identifier " ++ show name ++ "."
+    Nothing -> -- TODO: WIP
+      throwError $ trace ("...  context= " ++ show context ++ " name= " ++ show name)
+        ("Unknown identifier " ++ show name ++ ".")
 type'infer level context (left :@: right) = do
   left't <- type'infer level context left
   case left't of
@@ -52,19 +56,33 @@ type'infer level context (LamAnn par in'type body) = do
                 (subst'infer 0 (Free (Local level par)) body)
   return $ Val.Pi par (eval in'type) (Inf body) []
 -- TODO: also check this part ^^^ I have written it rather hastily
+-- I don't think this is correct, instead of (Inf body) and empty env
+-- I think it needs to be out'type or something around it
+-- (lambda x :: * -> x)
+-- Lam "x" x0 [] :: Pi "x" Star x0 []
+-- doesn't seem right
 
 
 type'check :: Int -> Context -> Term'Check -> Type -> Result ()
 type'check level context (Inf e) type' = do
   e't <- type'infer level context e
-  unless (type' == e't) (throwError "Type mismatch.")
+  unless (type' == e't) (throwError $ "Type mismatch. type' = " ++ show type' ++ "  /= " ++ show e't)
+
 type'check level context (Lam par body) pi@(Val.Pi param in'type out'type env) = do
-    type'check (level + 1) ((Local level par, in'type) : context )
-                (subst'check 0 (Free (Local level "_")) body) (val'app pi (Val.Free "_"))
+    type'check (level + 1) ((Local level par, in'type) : context)
+                -- (subst'check 0 (Free (Local level par)) body) (trace (show pi ++ " --- " ++ show (val'app pi (Val.Free "_"))) (val'app pi (Val.Free "_")))
+                (subst'check 0 (Free (Local level par)) body) (val'app pi (Val.Free param))
+-- WIP!!!
+                -- (subst'check 0 (Free (Local level par)) body) (trace (show pi ++ " --- " ++ show (val'app pi in'type)) (val'app pi (Val.Free param)))
+                -- (subst'check 0 (Free (Local level par)) body) (trace (show pi ++ " --- " ++ show (val'app pi in'type)) (val'app pi in'type))
+                --                                                                                                                 ^^^
+                --                                                   v paperu tam neposlou in'type ale jenom ten parametr znovu
+
+-- TODO: I think this line is wrong ^^^ I partially fixed it (left part)
 -- TODO: carefully check this part ^^^
 -- applying the Pi type function might be incorrect, check the paper for reference
 type'check _ _ _ _ =
-  throwError "Type mismatch."
+  throwError "Type mismatch. Incorrect shape."
 
 
 -- tahle funkce musi porovnat dva typy
@@ -124,7 +142,7 @@ type'check _ _ _ _ =
 -- it must "apply" the environment and only compare the two types after all the substitutions
 -- ignoring unused rests of the environment(s)
 instance Eq Val.Value where
-  (==) Val.Star Val.Star = False
+  (==) Val.Star Val.Star = True
   (==) (Val.Pi l'par l'in'type l'body l'env) (Val.Pi r'par r'in'type r'body r'env)
     | l'par == r'par && l'in'type == r'in'type
       = let
