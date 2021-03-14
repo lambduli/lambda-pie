@@ -36,77 +36,130 @@ import Dependently.Context
   '*'           { Tok.Star }
   '->'          { Tok.Arrow }
   '.'           { Tok.Dot }
-  forall        { Tok.Forall }
+  pi            { Tok.Forall }
 
 
 %%
 Program         ::  { Either Command Term'Check }
-                :   TermCheck                                       { Right $1 }
+                :   Term                                            { Right $1 }
                 |   Command                                         { Left $1 }
 
 
 TypedParams     ::  { [(String, Term'Check)] }
-                :   var '::' TermType                               { [($1, $3)] }
+                :   var '::' Type                                   { [($1, $3)] }
                 |   OneOrMany(TypedParam)                           { $1 }
 
 
 TypedParam      ::  { (String, Term'Check) }
-                :   '(' var '::' TermType ')'                       { ($2, $4) }
+                :   '(' var '::' Type ')'                           { ($2, $4) }
 
 
-TermInfer       ::  { Term'Infer }
-                :   AppLeft '::' TermType                           { Inf $1 ::: $3 }
-                -- Tohle neni OK, protoze bych tak mohl generovat
-                -- (AppLeft :: TermType) :: TermType tohle mi nevadi
-                -- takze to JE OK
-
-                -- |   AppLeft '::' TermType OneOrMany(AppRight)       { foldl (:@:) (Inf $1 ::: $3) $4 }
-                -- Tohle zakazuju ^^^ kvuli a :: Foo b c d -- co to je? kam patri b c d ? do typu?
-
-                -- |   '(' AppLeft '::' TermType ')' OneOrMany(AppRight)       { foldl (:@:) (Inf $2 ::: $4) $6 }
-                -- Tohle komentuju jenom jako pokus ^^^ budu to chtit umet parsovat
-                -- uz to umim -> kvuli prvnimu pravidlu
-
-                |   AppLeft OneOrMany(AppRight)                     { foldl (:@:) $1 $2 }
-                |   AppLeft OneOrMany(AppRight) '::' TermType       { Inf (foldl (:@:) $1 $2) ::: $4 }
-
-                |   '(' TermCheck3 '::' TermType ')' OneOrMany(AppRight)       { foldl (:@:) ($2 ::: $4) $6 }
-
-                -- |   TermCheck3 '::' TermType OneOrMany(AppRight)    { foldl (:@:) ($1 ::: $3) $4 }
-                -- |   '(' TermCheck3 '::' TermType ')' OneOrMany(AppRight)    { foldl (:@:) ($2 ::: $4) $6 }
-                -- Tohle komentuju jenom jako pokus ^^^ budu to chtit umet parsovat
-
-                |   TermInfer2                                      { $1 }
-
-                -- Co zkusit NoneOrMany(AppRight) :: TermType a pak udelat v Haskellu if
-
-
-TermInfer2      ::  { Term'Infer }
-                :   '(' TermInfer ')' {- %shift -}                  { $2 }
-                |   TermInfer3                                      { $1 }
-
-
-TermInfer3      ::  { Term'Infer }
-                :   '*'                                             { Star }
-                |   Forall                                          { $1 }
-                |   var                                             { Free $ Global $1 }
-                |   '(' lambda TypedParams '->' TermInfer ')'       { fix $ foldr
-                                                                       (\ (par, type') body -> LamAnn par type' body)
-                                                                       $5
-                                                                       $3 }
+App             ::  { Term'Infer }
+                :   AppLeft OneOrMany(AppRight)                     { foldl (:@:) $1 $2 }
 
 
 AppLeft         ::  { Term'Infer }
-                :   TermInfer2                                      { $1 }
+                :   '*'                                             { Star }
+                |   Pi                                              { $1 }
+                |   var                                             { Free $ Global $1 }
+                |   var '::' Type                                   { Inf (Free $ Global $1) ::: $3 }
+                |   '(' var '::' Type ')'                           { Inf (Free $ Global $2) ::: $4 }
+                |   '(' Lambda '::' Type ')'                        { $2 ::: $4 }
+                |   Lambda '::' Type                                { $1 ::: $3 }
+                |   '(' App ')'                                     { $2 }
+                |   '(' App ')' '::' Type                           { Inf $2 ::: $5 }
+                |   '(' '(' App ')' '::' Type ')'                   { Inf $3 ::: $6 }
 
 
 AppRight        ::  { Term'Check }
-                :   TermInfer2                                      { Inf $1 }
-                |   TermCheck2                                      { $1 }
+                :   '*'                                             { Inf $ Star }
+                |   Pi                                              { Inf $ $1 }
+                |   Lambda                                          { $1 }
+                |   '(' Lambda '::' Type ')'                        { Inf $ $2 ::: $4 }
+                -- |   Lambda '::' Type                                { Inf $1 ::: $3 }
+                |   var                                             { Inf $ Free $ Global $1 }
+                |   '(' var '::' Type ')'                           { Inf (Inf (Free $ Global $2) ::: $4) }
+                -- |   var '::' Type                                   { Inf (Inf (Free $ Global $1) ::: $3) }
+                |   '(' App ')'                                     { Inf $2 }
+                -- |   '(' App ')' '::' Type                           { Inf (Inf $2 ::: $5) }
+                |   '(' '(' App ')' '::' Type ')'                   { Inf (Inf $3 ::: $6) }
 
 
-Forall          ::  { Term'Infer }
-                :   forall TypedParams '.' TermCheck                { unwrap $ foldl
+Term            ::  { Term'Check }
+                :   Term '::' Type                                  { Inf $ $1 ::: $3 }
+                |   '*'                                             { Inf Star }
+                |   pi TypedParams '.' Type                         { Inf $ fix $ unwrap $ foldl
+                                                                        (\ body (name, type') ->
+                                                                          case body of
+                                                                          { Check ch -> Infer $ Pi name type' ch
+                                                                          ; Infer i -> Infer $ Pi name type' $ Inf i })
+                                                                        (Check $4)
+                                                                        $2 }
+                |   var                                             { Inf $ Free $ Global $1 }
+                |   '(' App ')'                                     { Inf $2 }
+                |   Lambda                                          { $1 }
+                |   '(' Term ')'                                    { $2 }
+                -- |   TypedLambda                                     { Inf $1 }
+
+
+Type            ::  { Term'Check }
+                :   Term                                            { $1 }
+
+
+-- TermInfer       ::  { Term'Infer }
+--                 :   AppLeft '::' TermType                           { Inf $1 ::: $3 }
+--                 -- Tohle neni OK, protoze bych tak mohl generovat
+--                 -- (AppLeft :: TermType) :: TermType tohle mi nevadi
+--                 -- takze to JE OK
+-- 
+--                 -- |   AppLeft '::' TermType OneOrMany(AppRight)       { foldl (:@:) (Inf $1 ::: $3) $4 }
+--                 -- Tohle zakazuju ^^^ kvuli a :: Foo b c d -- co to je? kam patri b c d ? do typu?
+-- 
+--                 -- |   '(' AppLeft '::' TermType ')' OneOrMany(AppRight)       { foldl (:@:) (Inf $2 ::: $4) $6 }
+--                 -- Tohle komentuju jenom jako pokus ^^^ budu to chtit umet parsovat
+--                 -- uz to umim -> kvuli prvnimu pravidlu
+-- 
+--                 |   AppLeft OneOrMany(AppRight)                     { foldl (:@:) $1 $2 }
+--                 |   AppLeft OneOrMany(AppRight) '::' TermType       { Inf (foldl (:@:) $1 $2) ::: $4 }
+-- 
+--                 |   '(' TermCheck3 '::' TermType ')' OneOrMany(AppRight)       { foldl (:@:) ($2 ::: $4) $6 }
+-- 
+--                 -- |   TermCheck3 '::' TermType OneOrMany(AppRight)    { foldl (:@:) ($1 ::: $3) $4 }
+--                 -- |   '(' TermCheck3 '::' TermType ')' OneOrMany(AppRight)    { foldl (:@:) ($2 ::: $4) $6 }
+--                 -- Tohle komentuju jenom jako pokus ^^^ budu to chtit umet parsovat
+-- 
+--                 |   TermInfer2                                      { $1 }
+-- 
+--                 -- Co zkusit NoneOrMany(AppRight) :: TermType a pak udelat v Haskellu if
+
+
+-- TermInfer2      ::  { Term'Infer }
+--                 :   '(' TermInfer ')' {- %shift -}                  { $2 }
+--                 |   TermInfer3                                      { $1 }
+
+
+-- TermInfer3      ::  { Term'Infer }
+--                 :   '*'                                             { Star }
+--                 |   Forall                                          { $1 }
+--                 |   var                                             { Free $ Global $1 }
+--                 |   '(' lambda TypedParams '->' TermInfer ')'       { fix $ foldr
+--                                                                        (\ (par, type') body -> LamAnn par type' body)
+--                                                                        $5
+--                                                                        $3 }
+
+
+-- AppLeft         ::  { Term'Infer }
+--                 :   TermInfer2                                      { $1 }
+-- 
+-- 
+-- AppRight        ::  { Term'Check }
+--                 :   TermInfer2                                      { Inf $1 }
+--                 |   TermCheck2                                      { $1 }
+-- 
+ 
+
+Pi                 ::  { Term'Infer }
+                   :   pi TypedParams '.' Term                         { fix $ unwrap $ foldl
                                                                         (\ body (name, type') ->
                                                                           case body of
                                                                           { Check ch -> Infer $ Pi name type' ch
@@ -116,39 +169,46 @@ Forall          ::  { Term'Infer }
 
 
 Params          ::  { [String] }
-                :   OneOrMany(var)                                  { $1 }
+                :   OneOrMany(var)                                     { $1 }
 
 
-TermCheck       ::  { Term'Check }
-                :   TermInfer                                       { Inf $1 }
-                |   Lambda                                          { $1 }
-                |   '(' TermCheck ')'                               { $2 }
-                |   TermCheck3 '::' TermType                        { Inf ($1 ::: $3) }
-                -- |   TermCheck2                                      { $1 }
+-- TermCheck       ::  { Term'Check }
+--                 :   TermInfer                                       { Inf $1 }
+--                 |   Lambda                                          { $1 }
+--                 |   '(' TermCheck ')'                               { $2 }
+--                 |   TermCheck3 '::' TermType                        { Inf ($1 ::: $3) }
+--                 -- |   TermCheck2                                      { $1 }
 
 
-TermType        ::  { Term'Check }
-                :   TermInfer3                                      { Inf $1 }
-                |   '(' TermType ')'                                { $2 }
-                |   AppLeft OneOrMany(AppRight)                     { Inf $ foldl (:@:) $1 $2 }
-                |   Lambda                                          { $1 }
+-- TermType        ::  { Term'Check }
+--                 :   TermInfer3                                      { Inf $1 }
+--                 |   '(' TermType ')'                                { $2 }
+--                 |   AppLeft OneOrMany(AppRight)                     { Inf $ foldl (:@:) $1 $2 }
+--                 |   Lambda                                          { $1 }
 
 
-TermCheck3      ::  { Term'Check }
-                :   Lambda                                          { $1 }
-                |   '(' TermCheck3 ')'                              { $2 }
+-- TermCheck3      ::  { Term'Check }
+--                 :   Lambda                                          { $1 }
+--                 |   '(' TermCheck3 ')'                              { $2 }
 
 
-TermCheck2      ::  { Term'Check }
-                :   Lambda                                          { $1 }
-                |   '(' TermCheck ')'                               { $2 }
+-- TermCheck2      ::  { Term'Check }
+--                 :   Lambda                                          { $1 }
+--                 |   '(' TermCheck ')'                               { $2 }
 
 
 Lambda          ::  { Term'Check }
-                :   '(' lambda Params '->' TermCheck ')'            { fix $ foldr
+                :   '(' lambda Params '->' Term ')'                    { fix $ foldr
                                                                         (\ arg body -> Lam arg body)
                                                                         $5
                                                                         $3 }
+
+
+-- TypedLambda     ::  { Term'Infer }
+--                 :   '(' lambda TypedParams '->' TermInfer ')'          { fix $ foldr
+--                                                                         (\ (par, type') body -> LamAnn par type' body)
+--                                                                         $5
+--                                                                         $3 }
 
 
 Command         ::  { Command }
@@ -197,6 +257,14 @@ fix'check (Inf term) context
 fix'infer :: Term'Infer -> [String] -> Term'Infer
 fix'infer (term ::: type') context
   = (fix'check term context) ::: type'
+fix'infer Star _
+  = Star
+fix'infer (Pi par in'type out'type) context
+ = Pi par (fix'check in'type context) (fix'check out'type (par : context))
+ --       ^^^ because the in'type of the Pi can not depend on the parameter
+ -- it is not needed to fix the in'type with the context containing also current parameter
+ -- then (forall x :: (f x) . ...)
+ -- will mean, that x ^^^^^ must be bound by some other - upper level Pi binder 
 fix'infer (Bound i n) _
   = Bound i n
 fix'infer (Free (Global name)) context
