@@ -88,8 +88,8 @@ AppRight        ::  { Term'Check }
 Term            ::  { Term'Check }
                 :   Term '::' Type                                  { Inf $ $1 ::: $3 }
                 |   '*'                                             { Inf Star }
-                |   pi TypedParams '.' Type                         { Inf $ fix $ unwrap $ foldl
-                                                                        (\ body (name, type') ->
+                |   pi TypedParams '.' Type                         { Inf $ fix $ unwrap $ foldr
+                                                                        (\ (name, type') body ->
                                                                           case body of
                                                                           { Check ch -> Infer $ Pi name type' ch
                                                                           ; Infer i -> Infer $ Pi name type' $ Inf i })
