@@ -68,6 +68,8 @@ TermInfer       ::  { Term'Infer }
 AppLeft         ::  { Term'Infer }
                 :   var                                             { Free $ Global $1 }
                 |   TermCheck '::' Type                             { $1 ::: $3 }
+                |   '(' TermCheck '::' Type ')'                     { $2 ::: $4 }
+
                 |   '(' lambda TypedParams '->' TermInfer ')'       { fix $ foldr
                                                                         (\ (par, type') body -> LamAnn par type' body)
                                                                         $5
