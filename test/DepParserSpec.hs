@@ -1,4 +1,4 @@
-module ParserSpec where
+module DepParserSpec where
 
 import Test.Hspec
 import System.Exit

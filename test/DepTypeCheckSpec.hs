@@ -1,4 +1,4 @@
-module TypeCheckSpec where
+module DepTypeCheckSpec where
 
 
 import Test.Hspec
