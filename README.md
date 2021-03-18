@@ -1,3 +1,3 @@
 # lambda-pie
 
-Implementation of the dependently type λ-calculus - λΠ.
+Implementation of the simply typed lambda calculus λ-> and dependently typed λ-calculus λΠ.
