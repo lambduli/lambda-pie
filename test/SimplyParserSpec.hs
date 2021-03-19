@@ -20,9 +20,13 @@ spec = describe "Just parses:" $ do
     just'parses "(a b c)"
   it "(a :: T)" $ do
     just'parses "(a :: T)"
+  it "a :: T" $ do
+    just'parses "a :: T"
   it "(\\ a -> a)" $ do
     just'parses "(\\ a -> a)"
 
+  it "(\\ a -> a) :: T -> T" $ do
+    just'parses "((\\ a -> a) :: T -> T)"
   it "((\\ a -> a) :: T -> T)" $ do
     just'parses "((\\ a -> a) :: T -> T)"
   it "((\\ a -> a) :: (T -> T))" $ do

@@ -57,6 +57,7 @@ TermInfer       ::  { Term'Infer }
 --                |   '(' TermInfer TermCheck ')'                     { $2 :@: $3 }
                 |   AppLeft OneOrMany(AppRight)                     { foldl (:@:) $1 $2 }
                 |   '(' TermCheck '::' Type ')'                     { $2 ::: $4 }
+                |   TermCheck '::' Type                             { $1 ::: $3 }
                 -- NOTE: adding parens around removes some conflicts
                 |   '(' lambda TypedParams '->' TermInfer ')'       { fix $ foldr
                                                                         (\ (par, type') body -> LamAnn par type' body)
