@@ -29,8 +29,8 @@ stack run systemf
 ```
 
 #### Typing in the REPLs
-- `\` is λ
-- `/\` is Λ
+- λ is typed as `λ` or `\` or `lambda`
+- Λ is typed as `/\`
 - type arguments in the System F are wrapped in the brackets like: `[Nat]`
 - to introduce either a type or a term of certain type to the system you use `assume` like: `assume Bool :: *`
 
