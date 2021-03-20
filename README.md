@@ -64,7 +64,7 @@ REPL for λ2
 λ2 >> assume (Nat :: *) (fst :: forall T . T -> T -> T) (snd :: forall T . T -> T -> T)
 λ2 >> assume pickone :: (forall T . T -> T -> T) -> (forall T . T -> T -> T) -> (forall T . T -> T -> T)
 λ2 >> pickone fst snd
-      ((picone fst) snd) :: (forall T . (T -> (T -> T)))
+      ((pickone fst) snd) :: (forall T . (T -> (T -> T)))
 ```
 
 <!--
