@@ -1,6 +1,6 @@
 # lambda-pie
 
-Implementation of the simply typed lambda calculus λ-> and dependently typed λ-calculus λΠ.
+Implementation of the simply typed lambda calculus λ->, System F λ2, and dependently typed λ-calculus λΠ.
 
 ### How to Use
 
@@ -21,6 +21,18 @@ or
 ```
 stack run dependently
 ```
+
+or
+
+```
+stack run systemf
+```
+
+#### Typing in the REPLs
+- `\` is λ
+- `/\` is Λ
+- type arguments in the System F are wrapped in the brackets like: `[Nat]`
+- to introduce either a type or a term of certain type to the system you use `assume` like: `assume Bool :: *`
 
 ### Simply Typed Lambda Calculus (λ->)
 
