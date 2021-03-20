@@ -51,3 +51,11 @@ Example with identity function:
 λ-> >> id b
        (id b) :: T
 ```
+
+### System F
+```
+REPL for λ2
+
+λ2 >> (/\ T . (\ (t :: T) -> t))
+       <type lambda> :: (forall T . (T -> T))
+```
