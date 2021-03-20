@@ -59,3 +59,21 @@ REPL for λ2
 λ2 >> (/\ T . (\ (t :: T) -> t))
        <type lambda> :: (forall T . (T -> T))
 ```
+
+```
+λ2 >> assume (Nat :: *) (fst :: forall T . T -> T -> T) (snd :: forall T . T -> T -> T)
+λ2 >> assume pickone :: (forall T . T -> T -> T) -> (forall T . T -> T -> T) -> (forall T . T -> T -> T)
+λ2 >> pickone fst snd
+      ((bul fst) snd) :: (forall T . (T -> (T -> T)))
+```
+
+<!--
+assume (Nat :: *) (fst :: forall T . T -> T -> T) (snd :: forall T . T -> T -> T)
+assume bul :: (forall T . T -> T -> T) -> (forall T . T -> T -> T) -> (forall T . T -> T -> T)
+
+fst = (/\ T . (\ (f :: T) (s :: T) -> f)) :: forall T . T -> T -> T
+snd = (/\ T . (\ (f :: T) (s :: T) -> f))
+(\ (b :: T) -> b  ) ((\ a b -> a ) :: (forall T . T -> T -> T) -> (forall T . T -> T -> T) -> (forall T . T -> T -> T)) [Nat]
+
+:: (forall T . T -> T -> T) -> (forall T . T -> T -> T) -> (forall T . T -> T -> T)
+-->
