@@ -62,8 +62,9 @@ type'infer level context (left :$: Type t'right) = do -- NEW
   kind'check context t'right Star -- NEW
   left't <- type'infer level context left -- NEW
   case left't of -- NEW
-    Forall _ out'type -> do -- NEW
-      return out'type -- NEW
+    Forall t'par out'type -> do -- NEW
+      let res'type = specify'type out'type t'par t'right
+      return res'type -- NEW
     _ -> throwError "Type error: illegal type application." -- NEW
 
 type'infer level context (LamAnn par in'type body) = do
