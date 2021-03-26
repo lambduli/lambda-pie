@@ -49,24 +49,17 @@ type'infer level context (left :@: right) = do
       type'check level context right in't
       return out't
     _ -> throwError "Type error: illegal application."
-
-type'infer level context (Type type') = do -- NEW
-  kind'check context type' Star -- NEW
-  return type' -- NEW
-
 type'infer level context (TyLam t'par body) = do -- NEW
   body't <- type'infer level ((Global t'par, HasKind Star) : context) body -- NEW
   return $ Forall t'par body't -- NEW
-
-type'infer level context (left :$: Type t'right) = do -- NEW
+type'infer level context (left :$: t'right) = do -- NEW
   kind'check context t'right Star -- NEW
   left't <- type'infer level context left -- NEW
   case left't of -- NEW
     Forall t'par out'type -> do -- NEW
-      let res'type = specify'type out'type t'par t'right
+      let res'type = subst'type out'type t'par t'right
       return res'type -- NEW
     _ -> throwError "Type error: illegal type application." -- NEW
-
 type'infer level context (LamAnn par in'type body) = do
   out'type <- type'infer (level + 1) ((Local level par, HasType in'type) : context)
                 (subst'infer 0 (Free (Local level par)) body)
@@ -97,8 +90,6 @@ instance Typeable Term'Infer where
     = type'infer'0 context app
   type'of t'app@(left :$: right) context  -- NEW
     = type'infer'0 context t'app -- NEW
-  type'of t@(Type type') context -- NEW
-    = type'infer'0 context t -- NEW
   type'of t'lam@(TyLam t'par body) context -- NEW
     = type'infer'0 context t'lam -- NEW
   type'of lam@(LamAnn name in'type body) context

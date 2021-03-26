@@ -10,8 +10,6 @@ import SystemF.Type
 eval'infer :: Term'Infer -> Env -> Val.Value
 eval'infer (e ::: _) env
   = eval'check e env
-eval'infer (Type type') env -- NEW
-  = Val.TypeArg type' -- NEW
 eval'infer (Bound ind name) env
   = env !! ind
 eval'infer (Free name) env
@@ -21,7 +19,7 @@ eval'infer (left :@: right) env
   = val'app (eval'infer left env) (eval'check right env)
 eval'infer (TyLam t'par term) env -- NEW
   = Val.TyLam t'par (Inf term) env -- NEW
-eval'infer (left :$: (Type t'right)) env -- NEW
+eval'infer (left :$: t'right) env -- NEW
   = type'app (eval'infer left env) t'right -- NEW
 eval'infer (LamAnn par in'type body) env
   = Val.Lam par (Inf body) env
@@ -38,7 +36,7 @@ type'app :: Val.Value -> Type -> Val.Value
 type'app (Val.TyLam _ body env) t'arg
   = eval'check body env
 type'app left t'arg
-  = Val.TyApp left (Val.TypeArg t'arg)
+  = Val.TyApp left t'arg
 
 
 eval'check :: Term'Check -> Env -> Val.Value

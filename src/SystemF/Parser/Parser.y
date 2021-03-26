@@ -62,8 +62,8 @@ TermInfer       ::  { Term'Infer }
 --                |   '(' TermInfer TermCheck ')'                     { $2 :@: $3 }
                 |   AppLeft OneOrMany(AppRight)                     { foldl
                                                                         (\ l r -> case r of
-                                                                          { Inf (Type t) -> l :$: Type t
-                                                                          ; term -> l :@: term })
+                                                                          { Left t -> l :$: t
+                                                                          ; Right term -> l :@: term })
                                                                         $1 $2 }
                 |   '(' TermCheck '::' Type ')'                     { $2 ::: $4 }
                 |   TermCheck '::' Type                             { $1 ::: $3 }
@@ -89,21 +89,21 @@ AppLeft         ::  { Term'Infer }
                 |   '(' typelambda var '.' TermInfer ')'            { TyLam $3 $5 }
 
 
-AppRight        ::  { Term'Check }
-                :   var                                             { Inf $ Free $ Global $1 }
-                |   '(' TermCheck '::' Type ')'                     { Inf $ $2 ::: $4 }
+AppRight        ::  { Either Type Term'Check }
+                :   var                                             { Right $ Inf $ Free $ Global $1 }
+                |   '(' TermCheck '::' Type ')'                     { Right $  Inf $ $2 ::: $4 }
                 -- NOTE: adding parens around removes 9 r/r conflict
-                |   '(' lambda TypedParams '->' TermInfer ')'       { Inf $ fix $ foldr
+                |   '(' lambda TypedParams '->' TermInfer ')'       { Right $ Inf $ fix $ foldr
                                                                         (\ (par, type') body -> LamAnn par type' body)
                                                                         $5
                                                                         $3 }
-                |   '(' TermInfer ')' {- %shift -}                  { Inf $ $2 }
-                |   '(' lambda Params '->' TermCheck ')'            { fix $ foldr
+                |   '(' TermInfer ')' {- %shift -}                  { Right $ Inf $ $2 }
+                |   '(' lambda Params '->' TermCheck ')'            { Right $ fix $ foldr
                                                                         (\ arg body -> Lam arg body)
                                                                         $5
                                                                         $3 }
-                |   '(' TermCheck ')'                               { $2 }
-                |   '[' Type ']'                                    { Inf $ Type $2 }
+                |   '(' TermCheck ')'                               { Right $2 }
+                |   '[' Type ']'                                    { Left $2 }
 
 
 Params          ::  { [String] }

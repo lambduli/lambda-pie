@@ -1,6 +1,8 @@
 module SystemF.Substitute where
 
 import SystemF.AST
+import SystemF.Type
+import SystemF.Name
 
 
 subst'infer :: Int -> Term'Infer -> Term'Infer -> Term'Infer
@@ -26,3 +28,14 @@ subst'check level rep (Inf exp)
   = Inf (subst'infer level rep exp)
 subst'check level rep (Lam par body)
   = Lam par (subst'check (level + 1) rep body)
+
+
+subst'type :: Type -> String -> Type -> Type
+subst'type (TFree (Global id)) name rep
+  | id == name = rep
+  | otherwise = TFree (Global id)
+subst'type (from :-> to) name rep
+  = subst'type from name rep :-> subst'type to name rep
+subst'type (Forall par type') name rep
+  | par == name = Forall par type'
+  | otherwise = Forall par (subst'type type' name rep)
