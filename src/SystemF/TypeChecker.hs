@@ -26,6 +26,8 @@ kind'check context (TFree name) Star =
 kind'check context (left't :-> right't) Star = do
   kind'check context left't Star
   kind'check context right't Star
+kind'check context (Forall t'par type') Star = do
+  kind'check ((Global t'par, HasKind Star) : context) type' Star
 
 
 type'infer'0 :: Context -> Term'Infer -> Result Type
