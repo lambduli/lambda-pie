@@ -18,7 +18,7 @@ eval'infer (Free name) env
 eval'infer (left :@: right) env
   = val'app (eval'infer left env) (eval'check right env)
 eval'infer (TyLam t'par term) env -- NEW
-  = Val.TyLam t'par (Inf term) env -- NEW
+  = Val.TyLam t'par term env -- NEW
 eval'infer (left :$: t'right) env -- NEW
   = type'app (eval'infer left env) t'right -- NEW
 eval'infer (LamAnn par in'type body) env
@@ -34,7 +34,7 @@ val'app left right
 
 type'app :: Val.Value -> Type -> Val.Value
 type'app (Val.TyLam _ body env) t'arg
-  = eval'check body env
+  = eval'infer body env
 type'app left t'arg
   = Val.TyApp left t'arg
 

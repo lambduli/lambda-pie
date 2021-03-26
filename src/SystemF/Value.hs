@@ -9,7 +9,7 @@ type Env = [Value]
 
 data Value
   = Lam String Term'Check Env
-  | TyLam String Term'Check Env -- NEW
+  | TyLam String Term'Infer Env -- NEW
   | Free String
   | App Value Value
   | TyApp Value Type -- NEW -- second Value is only ever be TypeArg
