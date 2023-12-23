@@ -9,7 +9,7 @@ import Dependently.Name
 import Dependently.Eval
 import Dependently.Substitute
 
-import Debug.Trace
+-- import Debug.Trace ( trace, traceM )
 
 
 type Result a = Either String a
@@ -24,24 +24,35 @@ type'infer'0 = type'infer 0
 
 type'infer :: Int -> Context -> Term'Infer -> Result Type
 type'infer level context (e ::: type') = do
+  -- traceM ("annotated  e= " ++ show e)
+  -- traceM ("           type= " ++ show type')
+  -- traceM ("context= " ++ show context)
+  -- traceM "___________________________________"
+
   type'check level context type' Val.Star
+  -- traceM ("past the type'check line  ")
   let type'' = eval'check type' []
+  -- traceM ("past eval'check line  type''= " ++ show type'')
   type'check level context e type''
+  -- traceM "_______________________________________________"
   return type''
+
 type'infer _ _ Star =
   return Val.Star
+
 type'infer level context (Pi par in'type out'type) = do
   type'check level context in'type Val.Star
   let in'type' = eval'check in'type []
   type'check (level + 1) ((Local level par, in'type') : context)
               (subst'check 0 (Free (Local level par)) out'type) Val.Star
   return Val.Star
+
 type'infer level context (Free name) = do
   case lookup name context of
     Just type' -> return type'
     Nothing -> -- TODO: WIP
-      throwError $ trace ("...  context= " ++ show context ++ " name= " ++ show name)
-        ("Unknown identifier " ++ show name ++ ".")
+      throwError ("Unknown identifier " ++ show name ++ ".")
+
 type'infer level context (left :@: right) = do
   left't <- type'infer level context left
   case left't of
@@ -51,6 +62,7 @@ type'infer level context (left :@: right) = do
 -- TODO: carefully check this part ^^^
 -- applying the Pi type function might be incorrect, check the paper for reference
     _ -> throwError "Type error: illegal application! Type of *left* must be a Pi."
+
 type'infer level context (LamAnn par in'type body) = do
   out'type <- type'infer (level + 1) ((Local level par, eval in'type) : context)
                 (subst'infer 0 (Free (Local level par)) body)
@@ -62,16 +74,21 @@ type'infer level context (LamAnn par in'type body) = do
 -- Lam "x" x0 [] :: Pi "x" Star x0 []
 -- doesn't seem right
 
+type'infer level ctx term
+  = error $! "non-hexhaustive pattern matching " ++ show term
+
 
 type'check :: Int -> Context -> Term'Check -> Type -> Result ()
 type'check level context (Inf e) type' = do
   e't <- type'infer level context e
-  unless (type' == e't) (throwError $ "Type mismatch. type' = " ++ show type' ++ "  /= " ++ show e't)
+  unless (type' == e't) (throwError $ "Type mismatch. type' = " ++ show type' ++ "  /= " ++ show e't ++ "\ncontext= " ++ show context)
 
 type'check level context (Lam par body) pi@(Val.Pi param in'type out'type env) = do
-    type'check (level + 1) ((Local level par, in'type) : context)
+    type'check  (level + 1)
+                ((Local level par, in'type) : context)
                 -- (subst'check 0 (Free (Local level par)) body) (trace (show pi ++ " --- " ++ show (val'app pi (Val.Free "_"))) (val'app pi (Val.Free "_")))
-                (subst'check 0 (Free (Local level par)) body) (val'app pi (Val.Free param))
+                (subst'check 0 (Free (Local level par)) body)
+                (val'app pi (Val.Free param))
 -- WIP!!!
                 -- (subst'check 0 (Free (Local level par)) body) (trace (show pi ++ " --- " ++ show (val'app pi in'type)) (val'app pi (Val.Free param)))
                 -- (subst'check 0 (Free (Local level par)) body) (trace (show pi ++ " --- " ++ show (val'app pi in'type)) (val'app pi in'type))

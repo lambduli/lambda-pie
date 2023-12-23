@@ -179,7 +179,7 @@ fix'check (Inf term) context
 
 fix'infer :: Term'Infer -> [String] -> Term'Infer
 fix'infer (term ::: type') context
-  = (fix'check term context) ::: type'
+  = (fix'check term context) ::: (fix'check type' context)
 fix'infer Star _
   = Star
 fix'infer (Pi par in'type out'type) context

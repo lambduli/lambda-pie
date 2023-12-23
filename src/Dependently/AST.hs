@@ -22,7 +22,7 @@ instance Show Term'Infer where
     = "*"
   -- show (Pi )
   show (Pi par in'type out'type)
-    = "(Pi " ++ par ++ " :: " ++ show in'type ++ " . " ++ show out'type ++ ")"
+    = "(Π " ++ par ++ " :: " ++ show in'type ++ " . " ++ show out'type ++ ")"
   show (Bound ind name)
     = name -- ++ show ind
   show (Free name)

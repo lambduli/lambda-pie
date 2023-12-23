@@ -38,6 +38,8 @@ token :-
 <0>         "->"            { plainTok Arrow }
 <0>         "."             { plainTok Dot }
 <0>         forall          { plainTok Forall }
+<0>         "Π"             { plainTok Forall }
+<0>         "∀"             { plainTok Forall }
 
 
 -- variables
