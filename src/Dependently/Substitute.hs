@@ -9,7 +9,7 @@ subst'infer _ _ Star
 subst'infer level rep (Pi par in'type out'type)
   = Pi par (subst'check level rep in'type) (subst'check (level + 1) rep out'type)
 subst'infer level rep (exp ::: type')
-  = subst'check level rep exp ::: type'
+  = subst'check level rep exp ::: (subst'check level rep type')
 subst'infer level rep (Bound indx name)
   | level == indx = rep
   | otherwise  = Bound indx name
