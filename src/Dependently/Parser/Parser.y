@@ -196,8 +196,8 @@ fix'infer (Free (Global name)) context
       Nothing -> Free (Global name)
 fix'infer (left :@: right) context
   = (fix'infer left context) :@: (fix'check right context)
-fix'infer (LamAnn par type' body) context
-  = LamAnn par type' $ fix'infer body (par : context)
+-- fix'infer (LamAnn par type' body) context
+--   = LamAnn par type' $ fix'infer body (par : context)
 
 
 parseError _ = do

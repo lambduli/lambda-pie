@@ -63,10 +63,10 @@ type'infer level context (left :@: right) = do
 -- applying the Pi type function might be incorrect, check the paper for reference
     _ -> throwError "Type error: illegal application! Type of *left* must be a Pi."
 
-type'infer level context (LamAnn par in'type body) = do
-  out'type <- type'infer (level + 1) ((Local level par, eval in'type) : context)
-                (subst'infer 0 (Free (Local level par)) body)
-  return $ Val.Pi par (eval in'type) (Inf body) []
+-- type'infer level context (LamAnn par in'type body) = do
+--   out'type <- type'infer (level + 1) ((Local level par, eval in'type) : context)
+--                 (subst'infer 0 (Free (Local level par)) body)
+--   return $ Val.Pi par (eval in'type) (Inf body) []
 -- TODO: also check this part ^^^ I have written it rather hastily
 -- I don't think this is correct, instead of (Inf body) and empty env
 -- I think it needs to be out'type or something around it
@@ -195,8 +195,8 @@ instance Typeable Term'Infer where
     = Right $ Val.Free "*" -- kinda ugly and horrible, but get the message delivered
   type'of app@(left :@: right) context
     = type'infer'0 context app
-  type'of lam@(LamAnn name in'type body) context
-    = type'infer'0 context lam
+  -- type'of lam@(LamAnn name in'type body) context
+  --   = type'infer'0 context lam
 
 
 instance Typeable Term'Check where
